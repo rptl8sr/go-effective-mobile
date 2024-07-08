@@ -91,3 +91,15 @@ func UpdateUser(u *models.User) error {
 
 	return nil
 }
+
+//go:embed queries/delete_user.sql
+var deleteUser string
+
+func DeleteUser(id int) (int64, error) {
+	res, err := client.Pool.Exec(client.Ctx, deleteUser, id)
+	if err != nil {
+		return 0, err
+	}
+
+	return res.RowsAffected(), nil
+}
