@@ -3,7 +3,6 @@ package db
 import (
 	_ "embed"
 	"errors"
-	"fmt"
 	"github.com/jackc/pgx/v5"
 	"go-effective-mobile/internal/models"
 )
@@ -48,6 +47,47 @@ func GetUser(id int) (*models.User, error) {
 	return &user, nil
 }
 
-func ErrUserNotFound(id int) error {
-	return fmt.Errorf("user %d not found", id)
+//go:embed queries/update_user.sql
+var updateUser string
+
+func UpdateUser(u *models.User) error {
+	saved, err := GetUser(u.ID)
+	if err != nil {
+		return err
+	}
+
+	if u.Name != "" && u.Name != saved.Name {
+		saved.Name = u.Name
+	}
+
+	if u.Surname != "" && u.Surname != saved.Surname {
+		saved.Surname = u.Surname
+	}
+
+	if u.Patronymic != "" && u.Patronymic != saved.Patronymic {
+		saved.Patronymic = u.Patronymic
+	}
+
+	if u.Address != "" && u.Address != saved.Address {
+		saved.Address = u.Address
+	}
+
+	if u.Passport != "" && u.Passport != saved.Passport {
+		saved.Passport = u.Passport
+	}
+
+	_, err = client.Pool.Exec(client.Ctx, updateUser,
+		u.ID,
+		saved.Surname,
+		saved.Name,
+		saved.Patronymic,
+		saved.Address,
+		saved.Passport,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
