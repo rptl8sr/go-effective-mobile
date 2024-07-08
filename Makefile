@@ -6,7 +6,7 @@ LOCAL_BIN:=$(CURDIR)/bin
 MIGRATIONS_DIR=$(CURDIR)/migrations
 GO_VERSION?=1.22.5
 GO := go
-DSN="host=$(PG_HOST) port=$(PG_PORT) dbname=$(PG_DATABASE_NAME) user=$(PG_USER) password=$(PG_PASSWORD) sslmode=$(PG_SSL_MODE)"
+DSN="host=$(PG_HOST) port=$(PG_PORT) dbname=$(PG_DATABASE) user=$(PG_USER) password=$(PG_PASSWORD) sslmode=$(PG_SSL_MODE)"
 
 .PHONY: git-init
 git-init:

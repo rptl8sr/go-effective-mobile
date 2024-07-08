@@ -6,6 +6,7 @@ import (
 	"go-effective-mobile/internal/config"
 	"go-effective-mobile/internal/logger"
 	"go-effective-mobile/internal/router"
+	"go-effective-mobile/internal/storage/db"
 	"net/http"
 )
 
@@ -16,6 +17,16 @@ type App struct {
 
 func New(ctx context.Context) (*App, error) {
 	cfg, err := config.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Init(ctx, cfg.DSN())
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
 	if err != nil {
 		return nil, err
 	}

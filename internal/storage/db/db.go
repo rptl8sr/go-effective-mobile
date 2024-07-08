@@ -3,8 +3,6 @@ package db
 import (
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"os"
-
 	"go-effective-mobile/internal/logger"
 )
 
@@ -17,9 +15,9 @@ type Client struct {
 	Ctx  context.Context
 }
 
-func New(ctx context.Context, dsn string) error {
+func Init(ctx context.Context, dsn string) error {
 	// TODO: create dsn or get it from cfg
-	cfg, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
+	cfg, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		logger.Error("pgxpool.ParseConfig error")
 		return err
