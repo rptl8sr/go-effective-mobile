@@ -12,6 +12,7 @@ var (
 )
 
 func Init() {
+	// TODO: add options with logging level
 	once.Do(func() {
 		globalLogger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	})

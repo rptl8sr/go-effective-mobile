@@ -39,6 +39,7 @@ func GetUser(id int) (*models.User, error) {
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
+			// TODO: move custom error to separate module to create HTTP response with right status code (400/500)
 			return nil, ErrUserNotFound(id)
 		}
 		return nil, err

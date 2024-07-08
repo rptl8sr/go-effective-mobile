@@ -8,9 +8,11 @@ import (
 )
 
 func main() {
+	// TODO: add logging level by using flags
 	logger.Init()
 
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	a, err := app.New(ctx)
 	if err != nil {
