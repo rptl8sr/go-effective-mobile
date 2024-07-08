@@ -22,13 +22,13 @@ type Config interface {
 
 func Load() (Config, error) {
 	if err := godotenv.Load(); err != nil {
-		logger.Error("Error loading .env file", "error", err.Error())
+		logger.Error("Error loading .env file")
 		return nil, err
 	}
 
 	port, err := strconv.ParseUint(os.Getenv("PORT"), 10, 16)
 	if err != nil {
-		logger.Error("Error parsing PORT", "error", err.Error())
+		logger.Error("Error parsing PORT")
 		return nil, err
 	}
 

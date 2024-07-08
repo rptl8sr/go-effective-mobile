@@ -2,7 +2,11 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"go-effective-mobile/internal/config"
+	"go-effective-mobile/internal/logger"
+	"go-effective-mobile/internal/router"
+	"net/http"
 )
 
 type App struct {
@@ -20,4 +24,16 @@ func New(ctx context.Context) (*App, error) {
 		Port: cfg.Port(),
 		Ctx:  ctx,
 	}, nil
+}
+
+func (a *App) Run() error {
+	logger.Info(fmt.Sprintf("Starting server on port %d", a.Port))
+	r := router.New()
+
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", a.Port),
+		Handler: r,
+	}
+
+	return srv.ListenAndServe()
 }

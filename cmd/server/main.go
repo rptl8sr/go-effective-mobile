@@ -18,4 +18,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = a.Run(); err != nil {
+		logger.Error("Failed to start server", "error", err)
+		os.Exit(1)
+	}
 }
