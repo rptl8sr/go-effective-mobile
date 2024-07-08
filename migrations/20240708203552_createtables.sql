@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TRIGGER update_users_modtime BEFORE UPDATE
-ON users FOR EACH ROW EXECUTE PROCEDURE  update_modified_column();
+ON users FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
 
 CREATE TABLE IF NOT EXISTS tasks (
     id SERIAL PRIMARY KEY,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
-CREATE TRIGGER update_tasks_modtime BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE PROCEDURE  update_modified_column();
+CREATE TRIGGER update_tasks_modtime BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
 
 CREATE INDEX idx_users_surname ON users(surname);
 CREATE INDEX idx_users_name ON users(name);
