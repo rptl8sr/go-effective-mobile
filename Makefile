@@ -2,6 +2,7 @@ PROJECT := "go-effective-mobile"
 USER := rptl8sr
 EMAIL := $(USER)@gmail.com
 LOCAL_BIN:=$(CURDIR)/bin
+MIGRATIONS_DIR=$(CURDIR)/migrations
 GO_VERSION?=1.22.5
 GO := go
 
@@ -17,6 +18,8 @@ git-init:
 	git remote add origin git@github.com:$(USER)/$(PROJECT).git
 	git remote -v
 	git push -u origin master
+	mkdir -p $(LOCAL_BIN)
+	mkdir -p $(MIGRATIONS_DIR)
 
 
 BN ?= dev
@@ -34,3 +37,16 @@ golangci-lint-install:
 .PHONY: lint
 lint:
 	$(LOCAL_BIN)/golangci-lint run ./...
+
+
+.PHONY: get-goose
+get-goose:
+	GOBIN=$(LOCAL_BIN) go install github.com/pressly/goose/v3/cmd/goose@v3.21.1
+
+
+.PHONY: make-goose
+make-goose:
+ifndef MN
+	$(error MN is undefined)
+endif
+	$(LOCAL_BIN)/goose -dir=$(MIGRATIONS_DIR) create $(MN) sql
