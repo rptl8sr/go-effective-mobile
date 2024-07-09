@@ -165,3 +165,22 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func Delete(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "userId")
+
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err = db.DeleteUser(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNoContent)
+}

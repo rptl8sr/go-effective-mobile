@@ -21,6 +21,7 @@ func New() *chi.Mux {
 	r.Post("/users", user.New)
 	r.Get("/users/{userId}", user.Get)
 	r.Patch("/users/{userId}", user.Update)
+	r.Delete("/users/{userId}", user.Delete)
 
 	// Tasks
 	r.Get("/tasks", func(w http.ResponseWriter, r *http.Request) {})
