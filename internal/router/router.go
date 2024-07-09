@@ -18,6 +18,7 @@ func New() *chi.Mux {
 	r.Get("/info", func(w http.ResponseWriter, r *http.Request) {})
 
 	// Users
+	r.Get("/users/", user.GetAll)
 	r.Post("/users", user.New)
 	r.Get("/users/{userId}", user.Get)
 	r.Patch("/users/{userId}", user.Update)

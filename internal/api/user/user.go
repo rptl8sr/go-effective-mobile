@@ -21,6 +21,10 @@ type userBody struct {
 	Address        *string `json:"address,omitempty"`
 }
 
+func GetAll(writer http.ResponseWriter, request *http.Request) {
+
+}
+
 func New(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
