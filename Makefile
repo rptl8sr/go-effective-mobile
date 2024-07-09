@@ -46,7 +46,7 @@ get-goose:
 
 
 .PHONY: goose-make-migrations
-make-goose:
+goose-make-migrations:
 ifndef MN
 	$(error MN is undefined)
 endif

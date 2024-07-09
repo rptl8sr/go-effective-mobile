@@ -14,7 +14,7 @@ func NewUser(u *models.User) (int, error) {
 	var userID int
 
 	err := client.Pool.QueryRow(client.Ctx, insertUser,
-		u.Surname, u.Name, u.Patronymic, u.Address, u.Passport).Scan(&userID)
+		u.Surname, u.Name, u.Patronymic, u.Address, u.PassportNumber).Scan(&userID)
 
 	if err != nil {
 		return 0, err
@@ -34,7 +34,7 @@ func GetUser(id int) (*models.User, error) {
 		&user.Name,
 		&user.Patronymic,
 		&user.Address,
-		&user.Passport,
+		&user.PassportNumber,
 	)
 
 	if err != nil {
@@ -73,8 +73,8 @@ func UpdateUser(u *models.User) error {
 		saved.Address = u.Address
 	}
 
-	if u.Passport != "" && u.Passport != saved.Passport {
-		saved.Passport = u.Passport
+	if u.PassportNumber != "" && u.PassportNumber != saved.PassportNumber {
+		saved.PassportNumber = u.PassportNumber
 	}
 
 	_, err = client.Pool.Exec(client.Ctx, updateUser,
@@ -83,7 +83,7 @@ func UpdateUser(u *models.User) error {
 		saved.Name,
 		saved.Patronymic,
 		saved.Address,
-		saved.Passport,
+		saved.PassportNumber,
 	)
 
 	if err != nil {

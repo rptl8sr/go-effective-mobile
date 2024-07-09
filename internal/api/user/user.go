@@ -2,21 +2,17 @@ package user
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
-	"strings"
-	"time"
-
+	"fmt"
 	"go-effective-mobile/internal/models"
 	"go-effective-mobile/internal/storage/db"
+	"io"
+	"net/http"
+	"regexp"
+	"strings"
 )
 
 type newUserBody struct {
-	Surname    string `json:"surname"`
-	Name       string `json:"name"`
-	Patronymic string `json:"patronymic,omitempty"`
-	Address    string `json:"address"`
-	Passport   string `json:"passport,omitempty"`
+	PassportNumber string `json:"passportNumber"`
 }
 
 func New(w http.ResponseWriter, r *http.Request) {
@@ -42,13 +38,14 @@ func New(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pn, err := validatePassport(newUser.PassportNumber)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	user := &models.User{
-		Surname:    newUser.Surname,
-		Name:       newUser.Name,
-		Patronymic: newUser.Patronymic,
-		Address:    newUser.Address,
-		Passport:   newUser.Passport,
-		CreatedAt:  time.Time{},
+		PassportNumber: pn,
 	}
 
 	id, err := db.NewUser(user)
@@ -70,9 +67,7 @@ func requiredFields(u *newUserBody) []string {
 	var emptyFields []string
 
 	rfs := map[string]string{
-		"Surname": u.Surname,
-		"Name":    u.Name,
-		"Address": u.Address,
+		"PassportNumber": u.PassportNumber,
 	}
 
 	for fieldName, fieldValue := range rfs {
@@ -82,4 +77,17 @@ func requiredFields(u *newUserBody) []string {
 	}
 
 	return emptyFields
+}
+
+func validatePassport(s string) (string, error) {
+	re := regexp.MustCompile(`^(\d{4})\s?(\d{6})$`)
+	matches := re.FindStringSubmatch(s)
+
+	if len(matches) != 3 {
+		return "", fmt.Errorf("invalid passport number")
+	}
+
+	pn := strings.Join(matches[1:], " ")
+
+	return pn, nil
 }
