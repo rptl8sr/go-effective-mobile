@@ -2,17 +2,26 @@ package user
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"go-effective-mobile/internal/models"
-	"go-effective-mobile/internal/storage/db"
 	"io"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
+
+	"github.com/go-chi/chi/v5"
+
+	"go-effective-mobile/internal/models"
+	"go-effective-mobile/internal/storage/db"
 )
 
 type newUserBody struct {
 	PassportNumber string `json:"passportNumber"`
+}
+
+type newUserResponse struct {
+	ID int `json:"id"`
 }
 
 func New(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +63,8 @@ func New(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(map[string]int{"id": id})
+	res := newUserResponse{ID: id}
+	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -90,4 +100,33 @@ func validatePassport(s string) (string, error) {
 	pn := strings.Join(matches[1:], " ")
 
 	return pn, nil
+}
+
+func Get(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "userId")
+
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user, err := db.GetUser(id)
+	if errors.Is(err, db.ErrUserNotFound) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }

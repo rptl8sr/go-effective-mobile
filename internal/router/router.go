@@ -18,9 +18,8 @@ func New() *chi.Mux {
 	r.Get("/info", func(w http.ResponseWriter, r *http.Request) {})
 
 	// Users
-	r.Get("/users", func(w http.ResponseWriter, r *http.Request) {})
 	r.Post("/users", user.New)
-	r.Get("/users/{userId}", func(w http.ResponseWriter, r *http.Request) {})
+	r.Get("/users/{userId}", user.Get)
 
 	// Tasks
 	r.Get("/tasks", func(w http.ResponseWriter, r *http.Request) {})

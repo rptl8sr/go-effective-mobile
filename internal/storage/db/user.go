@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"errors"
 	"github.com/jackc/pgx/v5"
+	"go-effective-mobile/internal/logger"
 	"go-effective-mobile/internal/models"
 )
 
@@ -29,18 +30,22 @@ var getUser string
 func GetUser(id int) (*models.User, error) {
 	var user models.User
 
-	err := client.Pool.QueryRow(client.Ctx, getUser, id).Scan(
+	logger.Info("GetUser Query", "msg", getUser)
+	row := client.Pool.QueryRow(client.Ctx, getUser, id)
+	err := row.Scan(
+		&user.ID,
 		&user.Surname,
 		&user.Name,
 		&user.Patronymic,
 		&user.Address,
 		&user.PassportNumber,
+		&user.CreatedAt,
+		&user.UpdatedAt,
 	)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			// TODO: move custom error to separate module to create HTTP response with right status code (400/500)
-			return nil, ErrUserNotFound(id)
+			return nil, ErrUserNotFound
 		}
 		return nil, err
 	}
