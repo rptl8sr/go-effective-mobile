@@ -6,11 +6,11 @@ import (
 	"strings"
 )
 
-func requiredFieldsNewUser(u *newUserBody) []string {
+func requiredFieldsNewUser(u *userBody) []string {
 	var emptyFields []string
 
 	rfs := map[string]string{
-		"PassportNumber": u.PassportNumber,
+		"PassportNumber": *u.PassportNumber,
 	}
 
 	for fieldName, fieldValue := range rfs {
@@ -33,4 +33,11 @@ func validatePassport(s string) (string, error) {
 	pn := strings.Join(matches[1:], " ")
 
 	return pn, nil
+}
+
+func safeDereference(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }

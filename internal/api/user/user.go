@@ -3,23 +3,22 @@ package user
 import (
 	"encoding/json"
 	"errors"
+	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
-
 	"go-effective-mobile/internal/models"
 	"go-effective-mobile/internal/storage/db"
 )
 
-type newUserBody struct {
-	PassportNumber string `json:"passportNumber"`
-}
-
-type newUserResponse struct {
-	ID int `json:"id"`
+type userBody struct {
+	PassportNumber *string `json:"passportNumber,omitempty"`
+	Surname        *string `json:"surname,omitempty"`
+	Name           *string `json:"name,omitempty"`
+	Patronymic     *string `json:"patronymic,omitempty"`
+	Address        *string `json:"address,omitempty"`
 }
 
 func New(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +29,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 	}
 	defer func() { _ = r.Body.Close() }()
 
-	var newUser newUserBody
+	var newUser userBody
 	err = json.Unmarshal(body, &newUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -45,7 +44,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pn, err := validatePassport(newUser.PassportNumber)
+	pn, err := validatePassport(*newUser.PassportNumber)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -53,6 +52,10 @@ func New(w http.ResponseWriter, r *http.Request) {
 
 	user := &models.User{
 		PassportNumber: pn,
+		Surname:        safeDereference(newUser.Surname),
+		Name:           safeDereference(newUser.Name),
+		Patronymic:     safeDereference(newUser.Patronymic),
+		Address:        safeDereference(newUser.Address),
 	}
 
 	id, err := db.NewUser(user)
@@ -61,14 +64,19 @@ func New(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := newUserResponse{ID: id}
-	err = json.NewEncoder(w).Encode(res)
+	createdUser, err := db.GetUser(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	err = json.NewEncoder(w).Encode(createdUser)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +98,45 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "userId")
+
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var user *models.User
+
+	err = json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if user.PassportNumber != "" {
+	}
+
+	pn, err := validatePassport(user.PassportNumber)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user.ID = id
+	user.PassportNumber = pn
+
+	err = db.UpdateUser(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -98,8 +144,9 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-}
-
-func Update(w http.ResponseWriter, r *http.Request) {
-
+	err = json.NewEncoder(w).Encode(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

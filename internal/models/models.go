@@ -4,13 +4,13 @@ import "time"
 
 type User struct {
 	ID             int        `json:"id"`
-	Surname        string     `json:"surname"`
-	Name           string     `json:"name"`
-	Patronymic     string     `json:"patronymic"`
-	Address        string     `json:"address"`
-	PassportNumber string     `json:"passport"`
-	CreatedAt      time.Time  `json:"created_at"`
-	UpdatedAt      *time.Time `json:"updated_at"`
+	Surname        string     `json:"surname,omitempty"`
+	Name           string     `json:"name,omitempty"`
+	Patronymic     string     `json:"patronymic,omitempty"`
+	Address        string     `json:"address,omitempty"`
+	PassportNumber string     `json:"passport,omitempty"`
+	CreatedAt      time.Time  `json:"created_at,omitempty"`
+	UpdatedAt      *time.Time `json:"updated_at,omitempty"`
 }
 
 type Status string
