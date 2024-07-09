@@ -3,8 +3,9 @@ package db
 import (
 	_ "embed"
 	"errors"
+
 	"github.com/jackc/pgx/v5"
-	"go-effective-mobile/internal/logger"
+
 	"go-effective-mobile/internal/models"
 )
 
@@ -30,7 +31,6 @@ var getUser string
 func GetUser(id int) (*models.User, error) {
 	var user models.User
 
-	logger.Info("GetUser Query", "msg", getUser)
 	row := client.Pool.QueryRow(client.Ctx, getUser, id)
 	err := row.Scan(
 		&user.ID,

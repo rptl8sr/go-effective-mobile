@@ -116,27 +116,42 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user *models.User
+	var userToUpdate userBody
 
-	err = json.NewDecoder(r.Body).Decode(&user)
+	err = json.NewDecoder(r.Body).Decode(&userToUpdate)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if user.PassportNumber != "" {
+	var pn string
+	if userToUpdate.PassportNumber != nil {
+		pn, err = validatePassport(*userToUpdate.PassportNumber)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 	}
 
-	pn, err := validatePassport(user.PassportNumber)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	user := models.User{
+		ID:             id,
+		PassportNumber: pn,
+		Surname:        safeDereference(userToUpdate.Surname),
+		Name:           safeDereference(userToUpdate.Name),
+		Patronymic:     safeDereference(userToUpdate.Patronymic),
+		Address:        safeDereference(userToUpdate.Address),
 	}
 
 	user.ID = id
 	user.PassportNumber = pn
 
-	err = db.UpdateUser(user)
+	err = db.UpdateUser(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	updatedUser, err := db.GetUser(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -144,7 +159,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(user)
+	err = json.NewEncoder(w).Encode(updatedUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
