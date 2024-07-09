@@ -3,10 +3,8 @@ package user
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -39,7 +37,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	emptyFields := requiredFields(&newUser)
+	emptyFields := requiredFieldsNewUser(&newUser)
 
 	if len(emptyFields) > 0 {
 		errorMessage := "Required fields are empty: " + strings.Join(emptyFields, ", ")
@@ -73,35 +71,6 @@ func New(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func requiredFields(u *newUserBody) []string {
-	var emptyFields []string
-
-	rfs := map[string]string{
-		"PassportNumber": u.PassportNumber,
-	}
-
-	for fieldName, fieldValue := range rfs {
-		if fieldValue == "" {
-			emptyFields = append(emptyFields, fieldName)
-		}
-	}
-
-	return emptyFields
-}
-
-func validatePassport(s string) (string, error) {
-	re := regexp.MustCompile(`^(\d{4})\s?(\d{6})$`)
-	matches := re.FindStringSubmatch(s)
-
-	if len(matches) != 3 {
-		return "", fmt.Errorf("invalid passport number")
-	}
-
-	pn := strings.Join(matches[1:], " ")
-
-	return pn, nil
-}
-
 func Get(w http.ResponseWriter, r *http.Request) {
 	userId := chi.URLParam(r, "userId")
 
@@ -129,4 +98,8 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+
 }
