@@ -2,6 +2,7 @@ package db
 
 import (
 	_ "embed"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -24,6 +25,20 @@ func NewTask(t *models.Task) (int, error) {
 	}
 
 	return taskID, nil
+}
+
+//go:embed queries/get_task.sql
+var getTask string
+
+func GetTask(id int, at *time.Time) (*models.Task, error) {
+	var task *models.Task
+
+	err := client.Pool.QueryRow(client.Ctx, getTask, id, &at).Scan(&task)
+	if err != nil {
+		return nil, err
+	}
+
+	return task, nil
 }
 
 //go:embed queries/start_task.sql
