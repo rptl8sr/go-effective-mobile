@@ -63,7 +63,7 @@ func StartTask(id, userID int) error {
 
 	err := client.Pool.QueryRow(client.Ctx, statusTask, id, userID).Scan(&status)
 	if status == string(models.Started) {
-		return fmt.Errorf("task already started, current status is '%s'", status)
+		return fmt.Errorf("task already started, current status is '%s', err: %w", status, err)
 	}
 
 	count, err := client.Pool.Exec(client.Ctx, startTask, id, userID)
@@ -82,7 +82,7 @@ func StopTask(id, userID int) (string, error) {
 
 	err := client.Pool.QueryRow(client.Ctx, statusTask, id, userID).Scan(&status)
 	if status != string(models.Started) {
-		return "", fmt.Errorf("task has not started, current status is '%s'", status)
+		return "", fmt.Errorf("task has not started, current status is '%s', err: %w", status, err)
 	}
 
 	var duration string

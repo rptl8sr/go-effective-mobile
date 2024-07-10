@@ -65,7 +65,10 @@ func New(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(strconv.Itoa(taskID)))
+	if _, err = w.Write([]byte(strconv.Itoa(taskID))); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {
@@ -178,7 +181,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if duration == "" {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, fmt.Sprint("task not found"), http.StatusNoContent)
 		return
 	}
 
