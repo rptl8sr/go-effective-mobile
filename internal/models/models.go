@@ -22,13 +22,13 @@ var (
 )
 
 type Task struct {
-	ID            int           `json:"id"`
-	UserID        int           `json:"user_id"`
-	Title         string        `json:"title"`
-	Status        Status        `json:"status"`
-	CreatedAt     time.Time     `json:"created_at"`
-	UpdatedAt     *time.Time    `json:"updated_at,omitempty"`
-	StartedAt     *time.Time    `json:"started_at,omitempty"`
-	CompletedAt   *time.Time    `json:"completed_at,omitempty"`
-	TotalDuration time.Duration `json:"total_duration"`
+	ID            int        `json:"id"`
+	UserID        int        `json:"user_id"`
+	Title         string     `json:"title"`
+	Status        Status     `json:"status"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     *time.Time `json:"updated_at,omitempty"`
+	StartedAt     *time.Time `json:"started_at,omitempty"`
+	CompletedAt   *time.Time `json:"completed_at,omitempty"`
+	TotalDuration string     `json:"total_duration"`
 }

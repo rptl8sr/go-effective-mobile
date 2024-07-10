@@ -29,7 +29,7 @@ func New() *chi.Mux {
 	r.Get("/users/{userId}/tasks", tasks.GetAll)
 	r.Get("/users/{userId}/tasks/{taskId}", tasks.Get)
 	r.Post("/users/{userId}/tasks", tasks.New)
-	r.Patch("/users/{userId}/tasks/{taskId}/start", tasks.Run)
+	r.Patch("/users/{userId}/tasks/{taskId}/start", tasks.Start)
 	r.Patch("/users/{userId}/tasks/{taskId}/stop", tasks.Stop)
 
 	// Tasks
