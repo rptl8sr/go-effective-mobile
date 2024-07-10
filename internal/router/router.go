@@ -26,7 +26,7 @@ func New() *chi.Mux {
 	r.Delete("/users/{userId}", user.Delete)
 
 	// User's tasks
-	r.Get("/users/{userId}/tasks", tasks.GetAll)
+	r.Get("/users/{userId}/tasks", tasks.GetUserTasks)
 	r.Get("/users/{userId}/tasks/{taskId}", tasks.Get)
 	r.Post("/users/{userId}/tasks", tasks.New)
 	r.Patch("/users/{userId}/tasks/{taskId}/start", tasks.Start)

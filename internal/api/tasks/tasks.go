@@ -58,7 +58,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.StartTask(taskID)
+	err = db.StartTask(taskID, userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,8 +96,28 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetAll(w http.ResponseWriter, r *http.Request) {
+func GetUserTasks(w http.ResponseWriter, r *http.Request) {
+	userIDraw := chi.URLParam(r, "userId")
 
+	userID, err := strconv.Atoi(userIDraw)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tasks, err := db.GetUserTasks(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(tasks)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func Start(w http.ResponseWriter, r *http.Request) {
@@ -110,7 +130,13 @@ func Start(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.StartTask(taskID)
+	userID, err := strconv.Atoi(userIDraw)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = db.StartTask(taskID, userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -139,12 +165,24 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	duration, err := db.StopTask(taskID)
+	userID, err := strconv.Atoi(userIDraw)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	duration, err := db.StopTask(taskID, userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	if duration == "" {
+		http.Error(w, err.Error(), http.StatusNoContent)
+		return
+	}
+
+	// TODO: add handling wrong user-task id's relative
 	msg := map[string]string{
 		"message": fmt.Sprintf("Task %s for user %s has been stopped. Total duration: %s", taskIDraw, userIDraw, duration),
 	}

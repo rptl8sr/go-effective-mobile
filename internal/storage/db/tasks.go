@@ -58,35 +58,79 @@ var statusTask string
 //go:embed queries/start_task.sql
 var startTask string
 
-func StartTask(id int) error {
+func StartTask(id, userID int) error {
 	var status string
 
-	err := client.Pool.QueryRow(client.Ctx, statusTask, id).Scan(&status)
+	err := client.Pool.QueryRow(client.Ctx, statusTask, id, userID).Scan(&status)
 	if status == string(models.Started) {
 		return fmt.Errorf("task already started, current status is '%s'", status)
 	}
 
-	_, err = client.Pool.Exec(client.Ctx, startTask, id)
+	count, err := client.Pool.Exec(client.Ctx, startTask, id, userID)
+	if count.RowsAffected() == 0 {
+		return fmt.Errorf("task not found")
+	}
+
 	return err
 }
 
 //go:embed queries/stop_task.sql
 var stopTask string
 
-func StopTask(id int) (string, error) {
+func StopTask(id, userID int) (string, error) {
 	var status string
 
-	err := client.Pool.QueryRow(client.Ctx, statusTask, id).Scan(&status)
+	err := client.Pool.QueryRow(client.Ctx, statusTask, id, userID).Scan(&status)
 	if status != string(models.Started) {
 		return "", fmt.Errorf("task has not started, current status is '%s'", status)
 	}
 
 	var duration string
 
-	err = client.Pool.QueryRow(client.Ctx, stopTask, id).Scan(&duration)
+	err = client.Pool.QueryRow(client.Ctx, stopTask, id, userID).Scan(&duration)
 	if err != nil {
 		return "", err
 	}
 
 	return duration, nil
+}
+
+//go:embed queries/get_user_tasks.sql
+var getUserTasks string
+
+func GetUserTasks(userID int) ([]*models.Task, error) {
+	var tasks []*models.Task
+
+	rows, err := client.Pool.Query(client.Ctx, getUserTasks, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		task := &models.Task{}
+		err = rows.Scan(
+			&task.ID,
+			&task.UserID,
+			&task.Title,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&task.StartedAt,
+			&task.CompletedAt,
+			&task.TotalDuration,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
 }
