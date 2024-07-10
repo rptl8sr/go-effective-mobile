@@ -1,6 +1,7 @@
 package router
 
 import (
+	"go-effective-mobile/internal/api/tasks"
 	"go-effective-mobile/internal/api/user"
 	"net/http"
 
@@ -23,6 +24,13 @@ func New() *chi.Mux {
 	r.Get("/users/{userId}", user.Get)
 	r.Patch("/users/{userId}", user.Update)
 	r.Delete("/users/{userId}", user.Delete)
+
+	// User's tasks
+	r.Get("/users/{userId}/tasks", tasks.GetAll)
+	r.Get("/users/{userId}/tasks/{taskId}", tasks.Get)
+	r.Post("/users/{userId}/tasks", tasks.New)
+	r.Patch("/users/{userId}/tasks/{taskId}/start", tasks.Run)
+	r.Patch("/users/{userId}/tasks/{taskId}/stop", tasks.Stop)
 
 	// Tasks
 	r.Get("/tasks", func(w http.ResponseWriter, r *http.Request) {})
