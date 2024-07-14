@@ -33,7 +33,7 @@ var getTask string
 
 func GetTask(id int, at *time.Time) (*models.Task, error) {
 	task := &models.Task{}
-
+	// TODO: check at
 	err := client.Pool.QueryRow(client.Ctx, getTask, id, at).Scan(
 		&task.ID,
 		&task.UserID,
@@ -98,10 +98,11 @@ func StopTask(id, userID int) (string, error) {
 //go:embed queries/get_user_tasks.sql
 var getUserTasks string
 
-func GetUserTasks(userID int) ([]*models.Task, error) {
+func GetUserTasks(userID int, start, end *string) ([]*models.Task, error) {
 	var tasks []*models.Task
 
-	rows, err := client.Pool.Query(client.Ctx, getUserTasks, userID)
+	rows, err := client.Pool.Query(client.Ctx, getUserTasks, userID, start, end)
+	fmt.Print(getUserTasks, userID, &start, &end)
 	if err != nil {
 		return nil, err
 	}

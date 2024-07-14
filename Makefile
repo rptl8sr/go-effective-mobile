@@ -3,7 +3,7 @@ PROJECT := "go-effective-mobile"
 USER := rptl8sr
 EMAIL := $(USER)@gmail.com
 LOCAL_BIN:=$(CURDIR)/bin
-MIGRATIONS_DIR=$(CURDIR)/migrations
+MIGRATIONS_DIR=$(CURDIR)/storage/db/migrations
 GO_VERSION?=1.22.5
 GO := go
 DSN="host=$(PG_HOST) port=$(PG_PORT) dbname=$(PG_DATABASE) user=$(PG_USER) password=$(PG_PASSWORD) sslmode=$(PG_SSL_MODE)"

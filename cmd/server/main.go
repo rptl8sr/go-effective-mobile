@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	"os"
+
 	"go-effective-mobile/internal/app"
 	"go-effective-mobile/internal/logger"
-	"os"
 )
 
 func main() {

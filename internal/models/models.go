@@ -32,3 +32,17 @@ type Task struct {
 	CompletedAt   *time.Time `json:"completed_at,omitempty"`
 	TotalDuration string     `json:"total_duration"`
 }
+
+type UserFilter struct {
+	Pagination struct {
+		Limit  int
+		Offset int
+	}
+	Surname        *string
+	Name           *string
+	Patronymic     *string
+	Address        *string
+	PassportNumber *string
+	MinDate        *time.Time
+	MaxDate        *time.Time
+}

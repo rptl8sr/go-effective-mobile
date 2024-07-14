@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func New(w http.ResponseWriter, r *http.Request) {
@@ -101,6 +102,8 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 func GetUserTasks(w http.ResponseWriter, r *http.Request) {
 	userIDraw := chi.URLParam(r, "userId")
+	startTimeRaw := r.URL.Query().Get("start_time")
+	endTimeRaw := r.URL.Query().Get("end_time")
 
 	userID, err := strconv.Atoi(userIDraw)
 	if err != nil {
@@ -108,7 +111,36 @@ func GetUserTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tasks, err := db.GetUserTasks(userID)
+	var startTime, endTime *string
+
+	if startTimeRaw != "" {
+		parsedStartTime, err := time.Parse(time.DateTime, startTimeRaw)
+		if err != nil {
+			http.Error(w, "Invalid start time", http.StatusBadRequest)
+			return
+		}
+		s := parsedStartTime.Format(time.RFC3339)
+		startTime = &s
+	}
+
+	if endTimeRaw != "" {
+		parsedEndTime, err := time.Parse(time.DateTime, endTimeRaw)
+		if err != nil {
+			http.Error(w, "Invalid end time", http.StatusBadRequest)
+			return
+		}
+		s := parsedEndTime.Format(time.RFC3339)
+		endTime = &s
+		//RFC3339TimeString, err := time.Parse(time.RFC3339, RFC3339Time)
+		//endTime = &RFC3339TimeString
+	}
+
+	//if startTime != nil && endTime != nil && startTime.After(*endTime) {
+	//	http.Error(w, "Start time cannot be after end time", http.StatusBadRequest)
+	//	return
+	//}
+
+	tasks, err := db.GetUserTasks(userID, startTime, endTime)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

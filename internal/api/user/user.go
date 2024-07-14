@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/go-chi/chi/v5"
+	"go-effective-mobile/internal/request"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"go-effective-mobile/internal/models"
 	"go-effective-mobile/internal/storage/db"
@@ -21,8 +23,74 @@ type userBody struct {
 	Address        *string `json:"address,omitempty"`
 }
 
-func GetAll(writer http.ResponseWriter, request *http.Request) {
+func GetAll(w http.ResponseWriter, r *http.Request) {
+	filter := models.UserFilter{}
 
+	// Get pagination params
+	if limit, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil {
+		filter.Pagination.Limit = limit
+	}
+
+	if offset, err := strconv.Atoi(r.URL.Query().Get("offset")); err == nil {
+		filter.Pagination.Offset = offset
+	}
+
+	surname := r.URL.Query().Get("surname")
+	if surname != "" {
+		filter.Surname = &surname
+	}
+
+	name := r.URL.Query().Get("name")
+	if name != "" {
+		filter.Name = &name
+	}
+
+	patronymic := r.URL.Query().Get("patronymic")
+	if patronymic != "" {
+		filter.Patronymic = &patronymic
+	}
+
+	address := r.URL.Query().Get("address")
+	if address != "" {
+		filter.Address = &address
+	}
+
+	passportNumber := r.URL.Query().Get("passport")
+	if passportNumber != "" {
+		filter.PassportNumber = &passportNumber
+	}
+
+	minDateStr := r.URL.Query().Get("minDate")
+	if minDateStr != "" {
+		minDate, err := time.Parse(time.RFC3339, minDateStr)
+		if err == nil {
+			filter.MinDate = &minDate
+		}
+	}
+
+	maxDateStr := r.URL.Query().Get("maxDate")
+	if maxDateStr != "" {
+		maxDate, err := time.Parse(time.RFC3339, maxDateStr)
+		if err == nil {
+			filter.MaxDate = &maxDate
+		}
+	}
+
+	// Get users from the database
+	users, err := db.GetUsers(r.Context(), filter)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Write user data to response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(users)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func New(w http.ResponseWriter, r *http.Request) {
@@ -73,6 +141,8 @@ func New(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	request.InfoChan <- id
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

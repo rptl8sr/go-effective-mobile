@@ -12,8 +12,9 @@ import (
 )
 
 type cfg struct {
-	port uint16
-	db   db
+	port   uint16
+	db     db
+	extapi string
 }
 
 type db struct {
@@ -28,6 +29,7 @@ type db struct {
 type Config interface {
 	Port() uint16
 	DSN() string
+	ExtAPI() string
 }
 
 func Load() (Config, error) {
@@ -55,7 +57,12 @@ func Load() (Config, error) {
 	dbSSLMode := os.Getenv("PG_SSL_MODE")
 
 	if dbHost == "" || dbPort == "" || dbUser == "" || dbPassword == "" || dbName == "" || dbSSLMode == "" {
-		return nil, err
+		return nil, fmt.Errorf("no enough environment variables")
+	}
+
+	extapi := os.Getenv("EXTAPI")
+	if extapi == "" {
+		return nil, fmt.Errorf("no EXTAPI environment variables")
 	}
 
 	dbConfig := db{
@@ -68,8 +75,9 @@ func Load() (Config, error) {
 	}
 
 	return &cfg{
-		port: uint16(port),
-		db:   dbConfig,
+		port:   uint16(port),
+		db:     dbConfig,
+		extapi: extapi,
 	}, nil
 }
 
@@ -82,4 +90,8 @@ func (c *cfg) DSN() string {
 		c.db.host, c.db.port, c.db.name, c.db.user, c.db.password, c.db.sslMode)
 
 	return dsn
+}
+
+func (c *cfg) ExtAPI() string {
+	return c.extapi
 }
